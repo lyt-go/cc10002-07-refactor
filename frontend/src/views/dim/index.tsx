@@ -11,7 +11,11 @@ const columns = [
   "历史策略",
   "生效日期",
   "失效日期",
-  "刷新周期"
+  "当前版本编号",
+  "当前代理键",
+  "版本总数",
+  "待发布草稿数",
+  "失效版本数"
 ]
 const actions = [
   "提交建表审批",
@@ -24,29 +28,15 @@ const statuses = [
   "已上线",
   "已下线"
 ]
-const stats = [
-  {
-    "label": "维度表总数",
-    "value": 0
-  },
-  {
-    "label": "已上线表",
-    "value": 0
-  },
-  {
-    "label": "建表审批中",
-    "value": 0
-  }
-]
 
-type Row = Record<string, string | number | null>
+type Row = Record<string, string | number | boolean | null>
 
 export default function DimView() {
   const [rows, setRows] = useState<Row[]>([])
   const [total, setTotal] = useState(0)
   const [errorMessage, setErrorMessage] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
-  const filterFields = useMemo(() => columns.slice(0, 3), [])
+  const filterFields = useMemo(() => ["维度编号", "维度名称", "自然键列"], [])
 
   const reload = useCallback(async () => {
     setErrorMessage('')
@@ -73,10 +63,11 @@ export default function DimView() {
     try {
       const response = await request(`${ENDPOINT}/${row.id}/actions`, {
         method: 'POST',
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ values: { action } }),
       })
-      if (!response.ok) {
-        throw new Error('维度层动作未生效，请稍后重试')
+      const payload = await response.json()
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.message || '维度层动作未生效，两个业务面已保持原状态')
       }
       await reload()
     } catch (error) {
@@ -89,7 +80,11 @@ export default function DimView() {
       <header className="page-head">
         <div>
           <h2>维度层管理</h2>
-          <p className="page-desc">管理维度层（DIM）数据表，定义缓慢变化维度策略、自然键与代理键映射。</p>
+          <p className="page-desc">
+            维度表只维护自然键、代理键列与生效/失效区间；版本结论统一由
+            <a className="link inline-link" href="/dim-version">维度版本台账</a>
+            驱动，发布、下线与回滚会同口径同步元数据管理与变更审计。
+          </p>
         </div>
         <div className="page-actions">
           <button className="btn primary" type="button" onClick={() => setErrorMessage('维度表登记入口尚未接入审批流')}>
@@ -102,12 +97,18 @@ export default function DimView() {
       </header>
 
       <div className="stat-row">
-        {stats.map((item) => (
-          <article key={item.label} className="stat-card">
-            <span className="stat-label">{item.label}</span>
-            <strong className="stat-value">{item.value}</strong>
-          </article>
-        ))}
+        <article className="stat-card">
+          <span className="stat-label">维度表总数</span>
+          <strong className="stat-value">{total}</strong>
+        </article>
+        <article className="stat-card">
+          <span className="stat-label">已上线表</span>
+          <strong className="stat-value">{rows.filter((r) => r.status === '已上线').length}</strong>
+        </article>
+        <article className="stat-card">
+          <span className="stat-label">含待发布草稿的表</span>
+          <strong className="stat-value">{rows.filter((r) => Number(r['待发布草稿数']) > 0).length}</strong>
+        </article>
       </div>
 
       <form className="filter-bar" onSubmit={(event) => { event.preventDefault(); void reload() }}>
@@ -129,13 +130,22 @@ export default function DimView() {
         <thead>
           <tr>
             {columns.map((column) => <th key={column}>{column}</th>)}
+            <th>版本台账</th>
             <th>可执行动作</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
             <tr key={String(row.id)}>
-              {columns.map((column) => <td key={column}>{row[column] ?? '—'}</td>)}
+              {columns.map((column) => <td key={column}>{String(row[column] ?? '—')}</td>)}
+              <td className="row-actions">
+                <a
+                  className="link"
+                  href={`/dim-version?dimension_no=${encodeURIComponent(String(row['维度编号'] ?? ''))}`}
+                >
+                  查看版本台账
+                </a>
+              </td>
               <td className="row-actions">
                 {actions.map((action) => (
                   <button key={action} className="link" type="button" onClick={() => void runAction(action, row)}>
@@ -147,14 +157,14 @@ export default function DimView() {
           ))}
           {rows.length === 0 && (
             <tr>
-              <td className="empty-state" colSpan={columns.length + 1}>暂无维度层数据，可先登记维度表</td>
+              <td className="empty-state" colSpan={columns.length + 2}>暂无维度层数据，可先登记维度表</td>
             </tr>
           )}
         </tbody>
       </table>
 
       <footer className="page-foot">
-        <span>共 {total} 条维度层记录</span>
+        <span>共 {total} 条维度层记录（status 取值：{statuses.join('、')}）</span>
         {errorMessage && <span className="error-text">{errorMessage}</span>}
       </footer>
     </section>

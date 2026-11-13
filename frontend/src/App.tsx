@@ -6,6 +6,7 @@ import LandingView from './views/landing'
 import OdsView from './views/ods'
 import DwdView from './views/dwd'
 import DimView from './views/dim'
+import DimVersionView from './views/dimversion'
 import DwsView from './views/dws'
 import AdsView from './views/ads'
 import PartitionView from './views/partition'
@@ -21,7 +22,7 @@ import CostView from './views/cost'
 import SyncView from './views/sync'
 import AuditlogView from './views/auditlog'
 
-const navItems = [{ label: "运营概览", path: "/" }, { label: "原始落地", path: "/landing" }, { label: "贴源层", path: "/ods" }, { label: "明细层", path: "/dwd" }, { label: "维度层", path: "/dim" }, { label: "汇总层", path: "/dws" }, { label: "应用层", path: "/ads" }, { label: "分区治理", path: "/partition" }, { label: "质量校验", path: "/quality" }, { label: "数据血缘", path: "/lineage" }, { label: "历史补数", path: "/backfill" }, { label: "清洗规则", path: "/cleanrule" }, { label: "转换编排", path: "/transform" }, { label: "数据字典", path: "/dictionary" }, { label: "元数据管理", path: "/metamodel" }, { label: "数据生命周期", path: "/lifecycle" }, { label: "存储成本", path: "/cost" }, { label: "同步通道", path: "/sync" }, { label: "变更审计", path: "/auditlog" }]
+const navItems = [{ label: "运营概览", path: "/" }, { label: "原始落地", path: "/landing" }, { label: "贴源层", path: "/ods" }, { label: "明细层", path: "/dwd" }, { label: "维度层", path: "/dim" }, { label: "维度版本台账", path: "/dim-version" }, { label: "汇总层", path: "/dws" }, { label: "应用层", path: "/ads" }, { label: "分区治理", path: "/partition" }, { label: "质量校验", path: "/quality" }, { label: "数据血缘", path: "/lineage" }, { label: "历史补数", path: "/backfill" }, { label: "清洗规则", path: "/cleanrule" }, { label: "转换编排", path: "/transform" }, { label: "数据字典", path: "/dictionary" }, { label: "元数据管理", path: "/metamodel" }, { label: "数据生命周期", path: "/lifecycle" }, { label: "存储成本", path: "/cost" }, { label: "同步通道", path: "/sync" }, { label: "变更审计", path: "/auditlog" }]
 
 export default function App() {
   const [operator] = useState('值班管理员')
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="/ods" element={<OdsView />} />
           <Route path="/dwd" element={<DwdView />} />
           <Route path="/dim" element={<DimView />} />
+          <Route path="/dim-version" element={<DimVersionView />} />
           <Route path="/dws" element={<DwsView />} />
           <Route path="/ads" element={<AdsView />} />
           <Route path="/partition" element={<PartitionView />} />

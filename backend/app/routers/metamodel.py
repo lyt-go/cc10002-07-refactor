@@ -30,6 +30,13 @@ def list_entries(
     return PageResult(items=items, total=total, page=page, size=size)
 
 
+@router.get("/export")
+def export_entries() -> dict[str, Any]:
+    """导出元数据管理清单：返回当前过滤条件下的全量数据。"""
+    items, total = service.list_entries(page=1, size=10000)
+    return {"module": "metamodel", "total": total, "items": items}
+
+
 @router.get("/{entry_id}", response_model=dict)
 def get_entry(entry_id: int) -> dict:
     """读取单条元数据项明细；不存在时给出可读的错误说明。"""
@@ -50,16 +57,16 @@ def create_entry(payload: EntryPayload) -> ActionResult:
 
 @router.post("/{entry_id}/actions", response_model=ActionResult)
 def run_action(entry_id: int, payload: EntryPayload) -> ActionResult:
-    """对单条元数据项执行提交元数据评审、发布元数据、下线元数据；不允许的动作会被拦下并说明原因。"""
+    """对单条元数据项执行提交元数据评审、发布元数据、下线元数据。
+
+    发布元数据时可在 values 中携带 引用版本id 与 引用生效日期：协调器会校验引用版本仍是
+    已发布结论且日期落在生效区间内，并冻结代理键快照；历史引用不会被批量改写。
+    """
     action = str(payload.values.get("action") or "").strip()
-    entry, message = service.run_action(entry_id, action)
+    operator = str(payload.values.get("operator") or "值班管理员")
+    entry, message = service.run_action(
+        entry_id, action, values=payload.values, operator=operator, remark=payload.remark or ""
+    )
     if entry is None:
         return ActionResult(ok=False, message=message)
     return ActionResult(ok=True, message=message, entry=entry)
-
-
-@router.get("/export")
-def export_entries() -> dict[str, Any]:
-    """导出元数据管理清单：返回当前过滤条件下的全量数据。"""
-    items, total = service.list_entries(page=1, size=10000)
-    return {"module": "metamodel", "total": total, "items": items}

@@ -33,3 +33,19 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .link { border: none; background: none; color: var(--brand); cursor: pointer; padding: 0; }
 .page-foot { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); }
 .error-text { color: #b42318; }
+
+/* 维度版本台账与跨页面联动新增样式 */
+.inline-link { margin: 0 4px; }
+.link.danger { color: #b42318; }
+.muted-text { color: var(--muted); font-size: 12px; }
+.row-abnormal { background: #fef3f2; }
+.panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin: 16px 0; }
+.side-panel { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.side-panel h3 { margin: 0 0 8px; font-size: 14px; }
+.filter-item.stack { display: block; margin-bottom: 8px; }
+.filter-item.stack input,
+.filter-item.stack select { width: 100%; margin-top: 2px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; }
+.resolve-result { margin-top: 8px; padding: 8px 10px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13px; }
+.modal-mask { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: flex; align-items: center; justify-content: center; z-index: 20; }
+.modal-card { background: #fff; border-radius: 10px; padding: 16px 20px; width: min(760px, 92vw); max-height: 84vh; overflow: auto; }
+.modal-card .data-table { margin-top: 8px; }
